@@ -4,7 +4,7 @@ A simple project for presenting a display of pixels written in rust. It uses the
 for handling server events 🦀
 
 
-> This is my first project to learn Rust so there is likely code that is not very idiomatic may not conform to best practices (but hey, i'm learning)
+> This is my first project to learn Rust so there is likely code that is not very idiomatic and may not conform to best practices (but hey, i'm learning)
 
 ### Description
 
@@ -31,10 +31,11 @@ understanding of how error handling works in rust.
 
 ![Screenshot](assets/screenshot.png?raw=true)
 
-
 ### Getting started
 
-To start the display:
+#### Starting the display
+
+Run the following command to start the display:
 
 ```bash
 RUST_LOG=DEBUG cargo run --bin server -- -w 240 -h 240
@@ -64,6 +65,19 @@ OPTIONS:
 
 ```
 
+#### Sending a test frame
+
+You can run the following command to send a test frame to the display:
+
+```bash
+cargo run --bin encode -- assets/rainbow.json
+```
+
+You should see a nice rainbow animation (like the screenshot above)
+
+The control server will be sending binary, but for the sake of simplicity this example accepts a JSON file and encodes
+it into the binary format required to display a frame.
+
 ## Binary protocol
 
 ### Frame binary structure
@@ -90,9 +104,9 @@ For a display of 8x32 pixels the number of pixels to send will be 256 multiplied
 | Bytes | Definition | Type                     | Description                  |
 | ----- | ---------- | ------------------------ | ---------------------------- |
 | 1     | command    | u8 (1 byte)              | Command                      |
-| 3     | rows       | u32 (4 bytes)  | Numbers of rows (i.e. 8)     |
-| 5     | columns    | u32  (4 bytes) | Numbers of columns (i.e. 32) |
-| 5     | padding    | u32  (4 bytes) | Padding between the pixels (i.e. 10) |
-| 10    | r          | u8 (1 byte)              | Red (0 - 255)                |
-| 11    | g          | u8 (1 byte)              | Green (0 - 255)              |
-| 12    | b          | u8 (1 byte)              | Blue (0 - 255)               |
+| 5     | rows       | u32 (4 bytes)  | Numbers of rows (i.e. 8)     |
+| 9     | columns    | u32  (4 bytes) | Numbers of columns (i.e. 32) |
+| 13     | padding    | u32  (4 bytes) | Padding between the pixels (i.e. 10) |
+| 14    | r          | u8 (1 byte)              | Red (0 - 255)                |
+| 15    | g          | u8 (1 byte)              | Green (0 - 255)              |
+| 16    | b          | u8 (1 byte)              | Blue (0 - 255)               |
