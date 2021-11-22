@@ -25,43 +25,46 @@ impl Application {
         let mut display = Display::new(width, height, &context);
         let mut event_loop = EventLoop::new(30);
 
-        server.run().await;
+        match server.run().await {
+            Ok(()) => {
+                loop {
+                    event_loop.tick();
+                    if let Some(event) = display.poll() {
+                        match event {
+                            DisplayEvent::Quit => {
+                                info!("Exciting");
+                                process::exit(1);
+                            }
+                            DisplayEvent::Redraw => {
+                                info!("Redraw");
+                            }
+                            DisplayEvent::Clear => {
+                                debug!("Received a clear command");
+                                display.clear();
+                                display.update();
+                            }
+                        }
+                    }
 
-        loop {
-            event_loop.tick();
-            if let Some(event) = display.poll() {
-                match event {
-                    DisplayEvent::Quit => {
-                        info!("Exciting");
-                        process::exit(1);
-                    }
-                    DisplayEvent::Redraw => {
-                        info!("Redraw");
-                    }
-                    DisplayEvent::Clear => {
-                        debug!("Received a clear command");
-                        display.clear();
-                        display.update();
+                    if let Some(event) = server.poll() {
+                        match event {
+                            Command::Frame(frame) => {
+                                debug!("Received a frame command");
+                                // render the frame
+                                display.draw(&frame);
+                                // show the frame
+                                display.update();
+                            }
+                            Command::Clear => {
+                                display.clear();
+                                display.update();
+                            }
+                            Command::None => {}
+                        }
                     }
                 }
             }
-
-            if let Some(event) = server.poll() {
-                match event {
-                    Command::Frame(frame) => {
-                        debug!("Received a frame command");
-                        // render the frame
-                        display.draw(&frame);
-                        // show the frame
-                        display.update();
-                    }
-                    Command::Clear => {
-                        display.clear();
-                        display.update();
-                    }
-                    Command::None => {}
-                }
-            }
-        }
+            Err(error) => return Err(error)
+        };
     }
 }

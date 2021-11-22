@@ -5,6 +5,7 @@ use futures::{SinkExt, StreamExt};
 use tokio::net::{TcpListener, TcpStream};
 use tokio_util::codec::Framed;
 
+use crate::common::ApplicationError;
 use crate::io::codec::CommandCodec;
 use crate::io::Queue;
 use crate::io::transport::{Command, CommandResponse};
@@ -23,21 +24,29 @@ impl Server {
         }
     }
 
-    pub async fn listen(&self) -> TcpListener {
-        TcpListener::bind(&self.address).await.unwrap()
+    pub async fn listen(&self) -> futures::io::Result<TcpListener> {
+        TcpListener::bind(&self.address).await
     }
 
-    pub async fn run(&self) {
-        let listener = self.listen().await;
-        let queue = self.queue.clone();
-        tokio::spawn(async move {
-            loop {
-                let (stream, _) = listener.accept().await.unwrap();
-                if let Ok(command) = Server::process_stream(stream).await {
-                    queue.push(command);
-                }
+    pub async fn run(&self) -> Result<(), ApplicationError> {
+        match self.listen().await {
+            Ok(listener) => {
+                let queue = self.queue.clone();
+                tokio::spawn(async move {
+                    loop {
+                        if let Ok((stream, _)) = listener.accept().await {
+                            if let Ok(command) = Server::process_stream(stream).await {
+                                queue.push(command);
+                            }
+                        }
+                    }
+                });
+                Ok(())
             }
-        });
+            Err(error) => {
+                Err(ApplicationError::Transport(format!("Could not start server: {}", error)))
+            }
+        }
     }
 
     pub fn poll(&self) -> Option<Command> {

@@ -14,26 +14,26 @@ impl Encoder {
         return match command {
             Command::Frame(frame) => {
                 // write command id
-                writer.write_u8(1).unwrap();
+                writer.write_u8(1)?;
                 // rows
-                writer.write_u32::<LittleEndian>(frame.rows()).unwrap();
+                writer.write_u32::<LittleEndian>(frame.rows())?;
                 // writer
-                writer.write_u32::<LittleEndian>(frame.columns()).unwrap();
+                writer.write_u32::<LittleEndian>(frame.columns())?;
                 // padding
-                writer.write_u32::<LittleEndian>(frame.padding()).unwrap();
+                writer.write_u32::<LittleEndian>(frame.padding())?;
 
                 // write the colours
                 for pixel in frame.pixels() {
                     let (_, colour) = pixel.split();
                     let (r, g, b) = colour.tuple();
-                    writer.write_u8(r).unwrap();
-                    writer.write_u8(g).unwrap();
-                    writer.write_u8(b).unwrap();
+                    writer.write_u8(r)?;
+                    writer.write_u8(g)?;
+                    writer.write_u8(b)?;
                 }
                 Ok(writer)
             }
             Command::Clear => {
-                writer.write_u8(2).unwrap();
+                writer.write_u8(2)?;
                 Ok(writer)
             }
             Command::None => {
