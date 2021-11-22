@@ -73,7 +73,7 @@ You can run the following command to send a test frame to the display:
 cargo run --bin encode -- assets/rainbow.json
 ```
 
-You should see a nice rainbow animation (like the screenshot above)
+You should see a nice rainbow animation (like the screenshot above).
 
 The control server will be sending binary, but for the sake of simplicity this example accepts a JSON file and encodes
 it into the binary format required to display a frame.
@@ -87,16 +87,16 @@ example representation of a grid of pixels:
 
 ```
     [rgb(255, 0, 0), rgb(248, 255, 41), rgb(255, 0, 0), rgb(255, 0, 0), rgb(255, 0, 0), rgb(255, 0, 0)],
-    [rgb(0, 255, 0), rgb(248, 255, 41), rgb(0, 255, 0), rgb(0, 255, 0), rgb(0, 255, 0), rgb(0, 255, 0)],
+    [rgb(0, 255, 0), rgb(0, 255, 0), rgb(0, 255, 0), rgb(0, 255, 0),  rgb(248, 255, 41),  rgb(0, 255, 0)],
     [rgb(0, 0, 255), rgb(248, 255, 41), rgb(0, 0, 255), rgb(0, 0, 255), rgb(0, 0, 255), rgb(0, 0, 255)]
 ```
 
 This would render to the display:
 
 ```
-    Row 1: red (x: 0, y: 0), yellow (x: 1, y: 0), red (x: 2, y: 0), red (x: 3, y: 0), red (x: 4, y: 0), red (x: 5, y: 0) 
-    Row 2: green  (x: 0, y: 1), yellow (x: 1, y: 1), green (x: 2, y: 1), green (x: 3, y: 1), green (x: 4, y: 1), green (x: 5, y: 1)
-    Row 3: blue (x: 0, y: 2), yellow (x: 1, y: 2), blue (x: 2, y: 2), blue (x: 3, y: 2), blue (x: 4, y: 2), blue (x: 5, y: 2)
+| red   | yellow | red   | red    | red   | red   |
+| green | green  | green | yellow | green | green |
+| blue  | yellow | blue  | blue   | blue  | blue  |
 ```
 
 For a display of 8x32 pixels the number of pixels to send will be 256 multiplied by 3 bytes (r, g, b colour values)
