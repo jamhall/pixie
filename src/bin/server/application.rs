@@ -64,7 +64,7 @@ impl Application {
                     }
                 }
             }
-            Err(error) => return Err(error)
-        };
+            Err(error) => Err(error)
+        }
     }
 }

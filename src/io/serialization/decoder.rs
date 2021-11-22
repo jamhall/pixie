@@ -2,7 +2,7 @@ use std::convert::TryFrom;
 
 use bytes::{Buf, BytesMut};
 
-use crate::common::{ApplicationError, Colour, Coordinate, Frame, Pixel};
+use crate::common::{ApplicationError, Colour, Frame};
 use crate::io::{Command, CommandType};
 
 pub struct Decoder {}
@@ -30,22 +30,13 @@ impl Decoder {
         let padding = reader.get_u32_le();
         let range = 0..rows * columns;
         // a nice bit of functional rust...
-        let pixels: Vec<Pixel> = range
+        let pixels: Vec<Colour> = range
             .into_iter()
-            .map(|_| self.decode_colour(reader))
-            .map(|(r, g, b)| Colour::new(r, g, b))
-            .collect::<Vec<Colour>>()
-            .chunks(columns as usize)
-            .enumerate().flat_map(|(y, row)| {
-            row.iter()
-                .enumerate()
-                .map(|(x, &colour)| {
-                    let coordinate = Coordinate::new(x as u32, y as u32);
-                    Pixel::new(coordinate, colour)
-                })
-                .collect::<Vec<Pixel>>()
-        })
-            .collect();
+            .map(|_| {
+                let (r, g, b) = self.decode_colour(reader);
+                Colour::new(r, g, b)
+            })
+            .collect::<Vec<Colour>>();
         let frame = Frame::new(rows, columns, padding, pixels);
         Ok(Command::Frame(frame))
     }

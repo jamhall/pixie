@@ -1,5 +1,4 @@
 use core::time;
-use std::convert::TryFrom;
 use std::error::Error;
 use std::fs::File;
 use std::io::{BufWriter, Read, Write};
@@ -8,7 +7,7 @@ use std::thread;
 
 use serde::{Deserialize, Serialize};
 
-use pixie::common::{ApplicationError, Colour, Coordinate, Frame, Pixel};
+use pixie::common::{ApplicationError, Colour, Frame};
 use pixie::io::{Command, Transport};
 
 #[derive(Serialize, Deserialize, Clone)]
@@ -37,20 +36,20 @@ fn process(path: String, address: String) -> Result<(), Box<dyn Error>> {
 
     let data: Data = serde_json::from_str(&contents)?;
     let columns = data.columns;
-    
+
     for (index, frame) in data.frames.into_iter().enumerate() {
-        let pixels = frame.into_iter().enumerate()
-            .flat_map(|(y, row)| {
+        let pixels = frame.iter()
+            .flat_map(|row| {
                 if row.len() == columns as usize {
-                    return row.into_iter().enumerate().map(|(x, (r, g, b))| {
-                        let coordinate = Coordinate::new(x as u32, y as u32);
-                        let colour = Colour::new(r, g, b);
-                        Pixel::new(coordinate, colour)
-                    }).collect::<Vec<Pixel>>();
+                    return row.iter()
+                        .map(|(r, g, b)| {
+                            Colour::new(*r, *g, *b)
+                        })
+                        .collect::<Vec<Colour>>();
                 }
                 panic!("Pixel count mismatch for row");
             })
-            .collect::<Vec<Pixel>>();
+            .collect::<Vec<Colour>>();
 
         let frame = Frame::new(data.rows, data.columns, data.padding, pixels);
         let command = Command::Frame(frame);

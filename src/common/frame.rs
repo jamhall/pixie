@@ -1,20 +1,20 @@
 use std::fmt;
 
-use crate::common::Pixel;
+use crate::common::Colour;
 
 #[derive(Debug, Clone)]
 pub struct Frame {
     rows: u32,
     columns: u32,
     padding: u32,
-    pixels: Vec<Pixel>,
+    pixels: Vec<Colour>,
 }
 
 impl Frame {
     pub fn new(rows: u32,
                columns: u32,
                padding: u32,
-               pixels: Vec<Pixel>) -> Self {
+               pixels: Vec<Colour>) -> Self {
         Self {
             rows,
             columns,
@@ -23,7 +23,7 @@ impl Frame {
         }
     }
 
-    pub fn pixels(&self) -> &Vec<Pixel> {
+    pub fn pixels(&self) -> &Vec<Colour> {
         &self.pixels
     }
 
@@ -51,18 +51,14 @@ impl fmt::Display for Frame {
 
 #[cfg(test)]
 mod test {
-    use crate::common::{Colour, Coordinate};
-
+    
     use super::*;
 
     #[test]
     fn test_create() {
-        // @TODO Implement a macro for defining a pixel
-        let coordinate = Coordinate::new(5, 8);
         let colour = Colour::new(255, 54, 78);
-        let pixel = Pixel::new(coordinate, colour);
-        let pixels = vec![pixel];
-        let frame = Frame::new(2, 3, 10, pixels);
+        let colours = vec![colour];
+        let frame = Frame::new(2, 3, 10, colours);
         assert_eq!(frame.rows(), 2);
         assert_eq!(frame.columns(), 3);
         assert_eq!(frame.padding(), 10);

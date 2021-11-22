@@ -23,8 +23,7 @@ impl Encoder {
                 writer.write_u32::<LittleEndian>(frame.padding())?;
 
                 // write the colours
-                for pixel in frame.pixels() {
-                    let (_, colour) = pixel.split();
+                for colour in frame.pixels() {
                     let (r, g, b) = colour.tuple();
                     writer.write_u8(r)?;
                     writer.write_u8(g)?;

@@ -1,7 +1,7 @@
 use sdl2::render::Canvas;
 use sdl2::video::Window;
 
-use crate::common::Frame;
+use crate::common::{Coordinate, Frame, Pixel};
 use crate::ui::painter::Painter;
 
 pub struct RendererConfig {
@@ -55,9 +55,21 @@ impl Renderer {
             .min(height / frame.rows())
             .max(1);
 
-        for pixel in frame.pixels() {
-            self.painter.draw(scale, frame.padding(), pixel);
-        }
+        frame.pixels()
+            .chunks(frame.columns() as usize)
+            .enumerate()
+            .flat_map(|(y, row)| {
+                row.iter()
+                    .enumerate()
+                    .map(|(x, column)| {
+                        let coordinate = Coordinate::new(x as u32, y as u32);
+                        Pixel::new(coordinate, *column)
+                    })
+                    .collect::<Vec<Pixel>>()
+            })
+            .for_each(|pixel| {
+                self.painter.draw(scale, frame.padding(), &pixel);
+            });
     }
 
     pub fn update(&self) {

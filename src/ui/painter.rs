@@ -40,7 +40,8 @@ impl Painter {
         Coordinate::new(tx, ty)
     }
 
-    pub fn draw(&self, scale: u32,
+    pub fn draw(&self,
+                scale: u32,
                 padding: u32,
                 pixel: &Pixel) {
         let coordinates = self.calculate_coordinates(scale, padding, pixel);
