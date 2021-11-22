@@ -24,7 +24,6 @@ impl fmt::Display for Colour {
     }
 }
 
-
 #[cfg(test)]
 mod test {
     use super::*;
@@ -35,6 +34,4 @@ mod test {
         assert_eq!(colour.tuple(), (255, 54, 78));
         assert_eq!("ff364e (255, 54, 78)", format!("{}", colour));
     }
-
-
 }

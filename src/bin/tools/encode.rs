@@ -1,4 +1,5 @@
 use core::time;
+use std::convert::TryFrom;
 use std::error::Error;
 use std::fs::File;
 use std::io::{BufWriter, Read, Write};
@@ -10,10 +11,13 @@ use serde::{Deserialize, Serialize};
 use pixie::common::{ApplicationError, Colour, Coordinate, Frame, Pixel};
 use pixie::io::{Command, Transport};
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 struct Data {
+    rows: u32,
+    columns: u32,
+    padding: u32,
     #[allow(clippy::type_complexity)]
-    frames: Vec<Vec<Vec<(f64, f64, f64, f64)>>>,
+    frames: Vec<Vec<Vec<(u8, u8, u8)>>>,
     delays: Vec<u64>,
 }
 
@@ -30,24 +34,25 @@ fn process(path: String, address: String) -> Result<(), Box<dyn Error>> {
     let mut contents = String::new();
     file.read_to_string(&mut contents)?;
 
-    let data: Data = serde_json::from_str(&contents)?;
 
+    let data: Data = serde_json::from_str(&contents)?;
+    let columns = data.columns;
+    
     for (index, frame) in data.frames.into_iter().enumerate() {
         let pixels = frame.into_iter().enumerate()
             .flat_map(|(y, row)| {
-                row.into_iter().enumerate().map(|(x, (r, g, b, _))| {
-                    let coordinate = Coordinate::new(x as u32, y as u32);
-                    let colour = Colour::new(
-                        (255.0 * r).round() as u8,
-                        (255.0 * g).round() as u8,
-                        (255.0 * b).round() as u8,
-                    );
-                    Pixel::new(coordinate, colour)
-                }).collect::<Vec<Pixel>>()
+                if row.len() == columns as usize {
+                    return row.into_iter().enumerate().map(|(x, (r, g, b))| {
+                        let coordinate = Coordinate::new(x as u32, y as u32);
+                        let colour = Colour::new(r, g, b);
+                        Pixel::new(coordinate, colour)
+                    }).collect::<Vec<Pixel>>();
+                }
+                panic!("Pixel count mismatch for row");
             })
             .collect::<Vec<Pixel>>();
 
-        let frame = Frame::new(8, 8, 10, pixels);
+        let frame = Frame::new(data.rows, data.columns, data.padding, pixels);
         let command = Command::Frame(frame);
         send(&address, command)?;
 
@@ -76,4 +81,6 @@ fn send(address: &str, command: Command) -> Result<(), ApplicationError> {
         Ok(())
     };
 }
+
+
 
